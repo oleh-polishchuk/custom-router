@@ -1,6 +1,6 @@
 # Custom Router
 
-Simple router for landing page. [_Demo_](http://custom-router.s3-website.eu-central-1.amazonaws.com/)
+Simple router for landing page. [_>>> Demo_](http://custom-router.s3-website.eu-central-1.amazonaws.com/)
 
 # How to use?
 
