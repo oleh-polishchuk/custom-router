@@ -1,114 +1,101 @@
 class Router {
 
     constructor(routes) {
-        this.selectorAttribute = 'data-selector';
-        this.linkAttribute = 'data-link';
-        this.linkForSelectorAttribute = 'data-link-for-selector';
+        this.navigateToAttribute = 'navigate-to';
+        this.viewNameAttribute = 'view-name';
 
         this.routes = routes || [];
     }
 
     init() {
-        let defaultLink = this.getDefaultLink();
-        let currentLink = this.getCurrentLink();
-
-        if (currentLink && this.isLinkDefined(currentLink)) {
-            this.hideContent();
-            this.showContentByLink(currentLink);
-        } else if (defaultLink) {
-            this.updateState(defaultLink);
-            this.hideContent();
-            this.showContentByLink(defaultLink);
-        }
-
-        this.initNavigationEventListener();
-        Router.injectStyles();
+        this.injectStyles();
+        this.onUserNavigate(url => {
+            this.updateState(url);
+        });
+        this.onStateChange(() => {
+            this.updateView();
+        });
+        this.updateView();
         Router.log('Router successfully initialized');
     }
 
-    addRoute(route) {
-        this.routes.push(route);
-    }
-
-    addRoutes(routes) {
-        routes.forEach(route => {
-            this.addRoute(route);
+    onUserNavigate(cb) {
+        const it = this;
+        $(`[${it.navigateToAttribute}]`).click(function () {
+            const path = $(this).attr(`${it.navigateToAttribute}`);
+            cb(path);
         });
     }
 
-    initNavigationEventListener() {
-        let $links = $(`[${this.linkAttribute}]`);
-        $links.each((index, $link) => {
-            $($link).click(() => {
-                let link = $($link).attr(`${this.linkAttribute}`);
-                let linkForSelector = $($link).attr(`${this.linkForSelectorAttribute}`);
-
-                this.updateState(link);
-                this.hideContent();
-                if (linkForSelector) {
-                    this.showContentBySelector(linkForSelector);
-                } else if (this.isLinkDefined(link)) {
-                    this.showContentByLink(link);
-                } else {
-                    let defaultLink = this.getDefaultLink();
-                    this.updateState(defaultLink);
-                    this.showContentByLink(defaultLink)
-                }
-            });
-        })
+    onStateChange(cb) {
+        $(window).on('popstate', cb);
     }
 
-    showContentByLink(link) {
-        const selector = this.getSelectorByLink(link);
-        $(`[${this.selectorAttribute}="${selector}"]`).each((index, item) => {
-            let $section = $(item);
-            if (!$section.hasClass('show')) {
-                $section.addClass('show');
-            }
-        })
+    updateState(url) {
+        document.title = this.getTitleByUrl(url);
+        window.history.pushState({}, '', url);
+        dispatchEvent(new PopStateEvent('popstate', { state: {} }));
     }
 
-    showContentBySelector(selector) {
-        $(`[${this.selectorAttribute}="${selector}"]`).each((index, item) => {
-            let $section = $(item);
-            if (!$section.hasClass('show')) {
-                $section.addClass('show');
-            }
-        })
+    getTitleByUrl(url) {
+        let route = this.routes.find(route => route.path === url);
+        return route && route.title;
+    }
+
+    updateView() {
+        const url = this.getCurrentPath();
+        const viewName = this.getViewNameByUrlOrDefault(url);
+
+        this.hideContent();
+        this.showContentByViewName(viewName);
+    }
+
+    getCurrentPath() {
+        return window.location.pathname;
     }
 
     hideContent() {
-        $(`[${this.selectorAttribute}]`).each((index, item) => {
+        $(`[${this.viewNameAttribute}]`).each((index, item) => {
             $(item).removeClass('show');
         });
     }
 
-    getCurrentLink() {
-        return window.location.pathname;
+    showContentByViewName(selector) {
+        $(`[${this.viewNameAttribute}="${selector}"]`).each((index, item) => {
+            let $section = $(item);
+            if (!$section.hasClass('show')) {
+                $section.addClass('show');
+            }
+        })
     }
 
-    updateState(url) {
-        window.history.pushState({}, 'title', url);
+    getViewNameByUrlOrDefault(url) {
+        let viewName = this.getViewNameByUrl(url);
+        if (viewName) {
+            return viewName;
+        } else {
+            return this.getDefaultViewName();
+        }
     }
 
-    getDefaultLink() {
-        let defaultRoute = this.routes.find(route => route.defaultUrl);
-        return defaultRoute && defaultRoute.url;
+    getViewNameByUrl(l) {
+        let route = this.routes.find(route => route.path === l);
+        return route && route.viewName;
     }
 
-    isLinkDefined(l) {
-        return this.routes.find(route => route.url === l);
+    getDefaultViewName() {
+        let route = this.routes.find(route => route.defaultView);
+        return route && route.viewName;
     }
 
-    getSelectorByLink(l) {
-        let route = this.routes.find(route => route.url === l);
-        return route.selector;
-    }
-
-    static injectStyles() {
-        let styleElem = document.createElement("style");
+    injectStyles() {
+        const styleElem = document.createElement("style");
         styleElem.appendChild(document.createTextNode(`
-            .show { 
+            [${this.viewNameAttribute}] {
+                display: none;
+            }
+
+            [${this.viewNameAttribute}].show { 
                 display: block; 
             }
         `));
