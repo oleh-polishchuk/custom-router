@@ -5,15 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://s3.eu-central-1.amazonaws.com/custom-router/router.min.js"></script>
+    <!--<script src="https://s3.eu-central-1.amazonaws.com/custom-router/router.min.js"></script>-->
+    <script src="router.js"></script>
     <script>
         (function ($) {
             $(document).ready(function () {
-                const router = new Router([
+                const router = new Router();
+
+                router.setAttributes({
+                    navigateTo: 'navigate-to',
+                    viewName: 'view-name',
+                });
+
+                router.addRoutes([
                     {
                         path: '/',
                         viewName: 'HomeView',
-                        title: 'Title',
+                        title: 'Home',
                         defaultView: true,
                     },
                     {
@@ -33,7 +41,7 @@
                     },
                 ]);
 
-                router.init();
+                router.initialize();
             })
         })(jQuery);
     </script>
@@ -42,10 +50,10 @@
 
 <main>
     <nav>
-        <a href="javascript:void(0)" navigate-to="/">Home</a>
-        <a href="javascript:void(0)" navigate-to="/dashboard">Dashboard</a>
-        <a href="javascript:void(0)" navigate-to="/invoices">Invoices</a>
-        <a href="javascript:void(0)" navigate-to="/about">About</a>
+        <a href="/" navigate-to="/">Home</a>
+        <a href="/dashboard" navigate-to="/dashboard">Dashboard</a>
+        <a href="/invoices" navigate-to="/invoices">Invoices</a>
+        <a href="/about" navigate-to="/about">About</a>
     </nav>
 
     <section class="section" view-name="HomeView"><h1>Home section</h1></section>

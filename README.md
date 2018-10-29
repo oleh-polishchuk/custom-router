@@ -75,3 +75,7 @@ Show current nginx configuration:
 Restart nginx server:
 
     sudo brew services restart nginx
+
+## TO-DO:
+
+- get every view using ajax request from backend
