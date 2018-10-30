@@ -36,11 +36,16 @@ and your **link to the view** with attribute `navigate-to=""`, for ex.:
 ```
 <script src="https://s3.eu-central-1.amazonaws.com/custom-router/router.min.js"></script>
 <script>
-    const router = new Router([
+    const router = new Router();
+    router.setAttributes({
+        navigateTo: 'navigate-to',
+        viewName: 'view-name',
+    });
+    router.addRoutes([
         {
             path: '/',
             viewName: 'HomeView',
-            title: 'Title',
+            title: 'Home',
             defaultView: true,
         },
         {
@@ -59,8 +64,7 @@ and your **link to the view** with attribute `navigate-to=""`, for ex.:
             title: 'About',
         },
     ]);
-
-    router.init();
+    router.initialize();
 </script>
 ```
 
